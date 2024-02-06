@@ -1,8 +1,8 @@
-version: '3.8'
+version: '3'
 
 services:
   api:
-    image: telitsynnikita/swarmlesssonapi:0.2
+    image: telitsynnikita/swarmlesssonapi:0.3
     ports:
       - 8090:80
     deploy:
