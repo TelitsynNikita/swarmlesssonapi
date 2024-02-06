@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-
-	secrets "github.com/ijustfool/docker-secrets"
 )
 
 // ServiceInfo is the model for application version info
@@ -13,29 +11,8 @@ type ServiceInfo struct {
 	Version string
 }
 
-var (
-	info = ServiceInfo{Version: os.Getenv("version")}
-)
-
-// Ручка токен получает токен из секрета Docker, сверяет с токеном из запроса.
-func token(w http.ResponseWriter, req *http.Request) {
-	// /run/secrets/<secret_name> for secrets and /<config-name> for configs
-	reqToken, ok := req.URL.Query()["token"]
-
-	if !ok || len(reqToken[0]) < 1 {
-		http.Error(w, "No token in your request", http.StatusBadRequest)
-		return
-	}
-	dockerSecrets, _ := secrets.NewDockerSecrets("")
-	token, _ := dockerSecrets.Get("swarm-lessons-token")
-	if token != reqToken[0] {
-		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
-	}
-}
-
-// Ручка version получает номер версии из переменных окружения.
 func version(w http.ResponseWriter, req *http.Request) {
-	info := ServiceInfo{Version: os.Getenv("version")}
+	info := ServiceInfo{Version: "0.2"}
 	js, err := json.Marshal(info)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -57,9 +34,5 @@ func main() {
 	http.HandleFunc("/version", version)
 	http.HandleFunc("/exit", exit)
 	http.HandleFunc("/crash", crash)
-	http.HandleFunc("/token", token)
-	err := http.ListenAndServe(":80", nil)
-	if err != nil {
-		return
-	}
+	http.ListenAndServe(":80", nil)
 }
